@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>生肖次数分组统计</title>
+    <style>
+        .container{font-family:"微软雅黑";max-width:600px;margin:20px auto;padding:20px;background:#f8f9fa;border-radius:8px;}
+        textarea{width:100%;height:150px;padding:10px;margin:15px 0;}
+        button{background:#4CAF50;color:white;padding:12px 30px;border:none;border-radius:5px;cursor:pointer;}
+        .result{font-size:16px;line-height:1.8;}
+        .group{margin:10px 0;padding:8px;border-bottom:1px dashed #ddd;}
+        .zero-count{color:#999;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>生肖次数分组统计</h2>
+        <textarea id="input" placeholder="请输入任意格式生肖文本"></textarea>
+        <button onclick="groupStatistics()">生成分组统计</button>
+        <div class="result" id="output"></div>
+    </div>
+
+    <script>
+        const SHENGXIAO = ['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪'];
+        
+        function groupStatistics(){
+            const input = document.getElementById('input').value.trim();
+            const output = document.getElementById('output');
+            if(!input){ output.innerHTML = '<div class="group">请输入内容</div>'; return; }
+            
+            // 提取并统计生肖次数
+            const chars = input.match(/[鼠牛虎兔龙蛇马羊猴鸡狗猪]/g) || [];
+            const count = SHENGXIAO.reduce((acc, s) => ({...acc, [s]:0}), {});
+            chars.forEach(c => count[c]++);
+            
+            // 按次数分组（包括0次）
+            const groups = {};
+            SHENGXIAO.forEach(s => {
+                const times = count[s];
+                if(!groups[times]) groups[times] = [];
+                groups[times].push(s);
+            });
+            
+            // 按次数降序排序分组
+            const sortedGroups = Object.entries(groups).sort((a, b) => b[0] - a[0]);
+            
+            // 生成格式化结果
+            let html = '';
+            sortedGroups.forEach(([times, sList]) => {
+                // 同次数生肖按固定顺序排序
+                const sortedList = sList.sort((a, b) => SHENGXIAO.indexOf(a) - SHENGXIAO.indexOf(b));
+                const isZero = times === '0';
+                const classAttr = isZero ? ' class="zero-count"' : '';
+                html += `<div${classAttr} class="group">〖${times}次〗${sortedList.join(' ')}（共${sortedList.length}个）</div>`;
+            });
+            
+            output.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
+
